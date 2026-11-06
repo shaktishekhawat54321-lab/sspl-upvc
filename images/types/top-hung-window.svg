@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img">
+<rect width="400" height="300" fill="#ffffff"/>
+<rect x="60" y="60" width="280" height="180" fill="none" stroke="#1d2a44" stroke-width="7"/>
+<rect x="72" y="72" width="256" height="156" fill="#e8f0f8" stroke="#1d2a44" stroke-width="5"/>
+<polyline points="80,222 200,80 320,222" fill="none" stroke="#168a4a" stroke-width="2.5" stroke-dasharray="7 6"/>
+<rect x="187" y="213" width="26" height="6" rx="3" fill="#7c879b"/>
+</svg>

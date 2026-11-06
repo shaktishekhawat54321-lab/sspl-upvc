@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel | Sani Steels Pvt Ltd</title><link rel="stylesheet" href="style.css"></head>
+<body class="admin-body">
+<header class="topbar"><div class="container nav"><a class="brand" href="index.html">Sani Steels Pvt Ltd <span>Admin</span></a><a class="btn outline" href="index.html">Customer Website</a></div></header>
+<main class="section"><div class="container">
+<div id="loginBox" class="admin-card narrow"><p class="eyebrow">OWNER ACCESS</p><h1>Admin Panel</h1>
+<p class="note" id="loginMode">Checking how this site is set up…</p>
+<div id="cloudLogin" style="display:none">
+<input id="adminEmail" type="email" placeholder="Owner e-mail" autocomplete="username">
+<input id="adminPasswordCloud" type="password" placeholder="Password" autocomplete="current-password">
+<button class="btn primary full" onclick="loginCloud()">Sign In</button>
+</div>
+<div id="localLogin" style="display:none">
+<input id="adminPassword" type="password" placeholder="Admin password">
+<button class="btn primary full" onclick="login()">Login</button>
+</div>
+<p class="note" id="loginError" style="color:#b0243a"></p></div>
+<div id="adminPanel" style="display:none">
+<div class="section-head"><div><p class="eyebrow">CONTROL PANEL</p><h1>Website Settings</h1></div><button class="btn outline" onclick="logout()">Logout</button></div>
+<div class="admin-card"><h2>Business & Home Text</h2><div class="two">
+<label>Shop Name<input id="businessName"></label><label>Call Number<input id="phone"></label></div>
+<div class="two"><label>WhatsApp / Enquiry Number<input id="inquiry"></label><label>Email<input id="email" type="email"></label></div>
+<label>Opening Hours<input id="hours" placeholder="9:30 AM – 7:30 PM"></label>
+<label>Shop Logo <input id="logoFile" type="file" accept="image/*" onchange="logoPreview(event)"></label><img id="logoPreview" class="admin-logo-preview" src="images/sspl-logo.svg" alt="Logo preview">
+<label>Address<input id="address"></label><label>Hero Small Text<input id="heroEyebrow"></label><label>Hero Heading<input id="heroTitle"></label><label>Hero Description<textarea id="heroText"></textarea></label>
+<button class="btn primary" onclick="saveSettings()">Save Website Text</button></div>
+
+<div class="admin-card"><h2>Products & Rates</h2><p class="note">Set each product's own rate. Customers will not see the admin panel.</p>
+<div id="productEditor"></div><button class="btn primary" onclick="saveProducts()">Save All Product Changes</button></div>
+
+<div class="admin-card"><h2>Quotation Settings</h2>
+<p class="note">These control the PDF quotation. Rates stay hidden from customers on the website — they appear only in the generated PDF.</p>
+<div class="three">
+<label>GST %<input id="gstRate" type="number" step="0.1" min="0"></label>
+<label>Quotation Valid For (days)<input id="validityDays" type="number" step="1" min="1"></label>
+<label>Minimum Billable Area (sq.ft)<input id="minAreaSqft" type="number" step="0.5" min="0"></label>
+</div>
+<label>Quotation No. Prefix<input id="quotePrefix"></label>
+<label>mm &rarr; sq.ft conversion
+<select id="mmDivisor">
+<option value="90000">Divide by 90,000 — trade standard (rounds up ~3%)</option>
+<option value="92903.04">Divide by 92,903.04 — mathematically exact</option>
+</select></label>
+<label>Terms &amp; Conditions <span class="note">(one per line, numbered automatically in the PDF)</span>
+<textarea id="terms" rows="10"></textarea></label>
+<button class="btn primary" onclick="saveQuoteSettings()">Save Quotation Settings</button></div>
+
+<div class="admin-card"><h2>Change Admin Password</h2><div class="two"><input id="newPassword" type="password" placeholder="New password"><input id="newPassword2" type="password" placeholder="Repeat password"></div><button class="btn outline" onclick="changePassword()">Change Password</button></div>
+
+<div class="admin-card"><h2>Cloud Sync</h2>
+<p class="note" id="cloudStatus">Checking…</p>
+<div id="cloudTools" style="display:none">
+<button class="btn outline" onclick="seedCloudNow()">Upload This Device's Data to Cloud</button>
+<p class="note">Use this once, when you first set up Firebase, to copy the catalogue and settings from this device into the cloud. After that every save goes to the cloud automatically and reaches all devices.</p>
+</div></div>
+
+<div class="admin-card"><h2>Quotation History</h2>
+<p class="note">Quotations customers have generated. <span id="quoteHistWhere"></span></p>
+<div id="quoteHistory"></div>
+<button class="btn outline" onclick="loadQuoteHistory()">Refresh</button></div>
+
+<div class="admin-card"><h2>Backup</h2><p class="note">Export your settings before changing phones or browsers.</p><button class="btn outline" onclick="exportData()">Download Backup</button> <label class="file-btn">Restore Backup<input type="file" accept=".json" onchange="importData(event)"></label></div>
+</div></div></main>
+<script src="data.js"></script>
+<script src="firebase-config.js"></script>
+<script src="store.js"></script><script src="admin.js"></script></body></html>

@@ -1,0 +1,16 @@
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# editors
+.vscode/
+.idea/
+*.swp
+
+# local experiments — never deploy these
+_test-*
+*.log
+
+# if you ever add tooling
+node_modules/

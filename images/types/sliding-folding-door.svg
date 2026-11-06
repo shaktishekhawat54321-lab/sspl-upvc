@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img">
+<rect width="400" height="300" fill="#ffffff"/>
+<rect x="40" y="22" width="320" height="222" fill="none" stroke="#1d2a44" stroke-width="7"/><rect x="50" y="32" width="70" height="202" fill="#e8f0f8" stroke="#1d2a44" stroke-width="5"/><rect x="128" y="32" width="70" height="202" fill="#d7e6f3" stroke="#1d2a44" stroke-width="5"/><rect x="206" y="32" width="70" height="202" fill="#e8f0f8" stroke="#1d2a44" stroke-width="5"/><rect x="284" y="32" width="70" height="202" fill="#d7e6f3" stroke="#1d2a44" stroke-width="5"/>
+<g stroke="#168a4a" stroke-width="3" fill="none" stroke-linecap="round">
+<line x1="290" y1="262" x2="100" y2="262"/>
+<polyline points="109,256 100,262 109,268"/></g>
+<text x="200" y="284" font-family="Arial" font-size="15" fill="#168a4a" text-anchor="middle">FOLDS TO ONE SIDE</text>
+</svg>

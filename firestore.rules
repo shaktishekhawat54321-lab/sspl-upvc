@@ -1,0 +1,70 @@
+rules_version = '2';
+
+// ===================================================================
+// SSPL uPVC quotation system — Firestore security rules
+//
+// Paste these into Firebase Console -> Firestore Database -> Rules
+// and press Publish. Until you do, Firebase's default rules either
+// block everything or (in test mode) let ANYONE on the internet
+// rewrite your rates — so do not leave test mode running.
+//
+// Shape of the data:
+//   site/settings      one document, the shop settings
+//   products/{id}      one document per catalogue item
+//   quotations/{id}    one document per quotation a customer generates
+// ===================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Only the owner account may write. Set OWNER_UID to the User UID
+    // shown in Authentication -> Users, or leave the e-mail check if
+    // you prefer. Using the UID is the stronger of the two.
+    function isOwner() {
+      return request.auth != null
+          && request.auth.token.email == 'online@coreindia.co.in'
+          && request.auth.token.email_verified == true;
+    }
+
+    // ---- shop settings -------------------------------------------
+    // Everyone reads them (the website needs name, logo, numbers).
+    match /site/{doc} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+
+    // ---- catalogue ------------------------------------------------
+    // Everyone reads. Rates live here, and they are visible to anyone
+    // who opens the browser console — that is unavoidable for a static
+    // site that prices in the browser. See FIREBASE-SETUP.md.
+    match /products/{id} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+
+    // ---- quotations -----------------------------------------------
+    // Customers are not signed in, so they may only CREATE a record,
+    // never read, change or delete one. Only the owner can read them
+    // back, so one customer can never see another's quotation.
+    match /quotations/{id} {
+
+      allow read, update, delete: if isOwner();
+
+      allow create: if isValidQuotation(request.resource.data);
+    }
+
+    function isValidQuotation(d) {
+      return d.keys().hasAll(['qno', 'customer', 'itemCount'])
+          && d.qno is string      && d.qno.size() <= 60
+          && d.customer is string && d.customer.size() > 0 && d.customer.size() <= 120
+          && d.phone is string    && d.phone.size() <= 20
+          && d.address is string  && d.address.size() <= 300
+          && d.itemCount is int   && d.itemCount > 0 && d.itemCount <= 60
+          && d.items is list      && d.items.size() <= 60
+          // keep a spammer from writing arbitrary blobs into your project
+          && d.size() <= 14;
+    }
+
+    // Anything not matched above is denied.
+  }
+}

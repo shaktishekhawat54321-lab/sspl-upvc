@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img">
+<rect width="400" height="300" fill="#ffffff"/>
+<rect x="30" y="50" width="340" height="200" fill="none" stroke="#1d2a44" stroke-width="7"/>
+<rect x="38" y="60" width="101.33333333333333" height="180" fill="#e8f0f8" stroke="#1d2a44" stroke-width="5"/>
+<rect x="147.33333333333331" y="60" width="101.33333333333333" height="180" fill="#d7e6f3" stroke="#1d2a44" stroke-width="5"/>
+<rect x="256.66666666666663" y="60" width="103.33333333333333" height="180" fill="#e8f0f8" stroke="#1d2a44" stroke-width="5"/>
+<rect x="126.33333333333331" y="137" width="6" height="26" rx="3" fill="#7c879b"/>
+<rect x="235.66666666666663" y="137" width="6" height="26" rx="3" fill="#7c879b"/>
+<g stroke="#168a4a" stroke-width="3" fill="none" stroke-linecap="round">
+<line x1="75" y1="272" x2="140" y2="272"/>
+<polyline points="131,266 140,272 131,278"/></g>
+<g stroke="#168a4a" stroke-width="3" fill="none" stroke-linecap="round">
+<line x1="325" y1="272" x2="260" y2="272"/>
+<polyline points="269,266 260,272 269,278"/></g>
+</svg>

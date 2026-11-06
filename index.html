@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sani Steels Pvt Ltd</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar"><div class="container nav">
+<a class="brand" href="#home"><img id="logo" class="logo" src="images/sspl-logo.svg" alt="Sani Steels Pvt Ltd"><span id="brand">Sani Steels Pvt Ltd</span></a>
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+<nav id="navMenu"><a href="#home">Home</a><a href="#products">Products</a><a href="#quote">Quotation</a><a href="#contact">Contact</a></nav>
+</div></header>
+
+<main>
+<section id="home" class="hero"><div class="container hero-grid">
+<div><p class="eyebrow" id="heroEyebrow">uPVC • ALUMINIUM • GLASS • DOORS • WINDOWS</p>
+<h1 id="heroTitle">Modern Doors & Windows for Your Home</h1>
+<p class="lead" id="heroText">Choose your product and send your requirement directly on WhatsApp.</p>
+<div class="hero-actions"><a class="btn primary" href="#products">View Products</a><a class="btn whatsapp" id="heroWhatsApp" target="_blank">WhatsApp Enquiry</a></div>
+</div><div class="hero-card"><img id="heroImage" src="images/types/sliding-3track.svg" alt="Product"><div class="hero-card-label">Sani Steels Pvt Ltd</div></div>
+</div></section>
+
+<section id="products" class="section"><div class="container">
+<div class="section-head"><div><p class="eyebrow">PRODUCT CATALOGUE</p><h2>Choose a Product</h2></div><p>Customer only selects a product and sends the requirement.</p></div>
+<div class="filter" id="filters"></div><div class="product-grid" id="productGrid"></div>
+</div></section>
+
+<section id="quote" class="section alt"><div class="container">
+<div class="section-head"><div><p class="eyebrow">BUILD YOUR QUOTATION</p><h2>Your Quotation</h2></div><p>Add as many windows and doors as you need, then download the PDF or send it to us on WhatsApp.</p></div>
+
+<div class="admin-card">
+<div class="three">
+<label>Your Name<input id="custName" placeholder="Full name"></label>
+<label>Phone / WhatsApp<input id="custPhone" type="tel" placeholder="10-digit number"></label>
+<label>Site Address<input id="custAddress" placeholder="Area, city"></label>
+</div>
+
+<div id="quoteList">
+<p class="note" id="quoteEmpty">No items yet. Choose a window or door above and press <b>Add to Quotation</b>.</p>
+<div id="quoteItems"></div>
+</div>
+
+<div class="quote-cta"><a class="btn outline" href="#products">+ Add another item</a></div>
+
+<div id="quoteActions" class="quote-actions-row" style="display:none">
+<button class="btn primary" onclick="downloadQuotePdf()">Download PDF Quotation</button>
+<button class="btn outline" onclick="previewQuotePdf()">Preview PDF</button>
+<button class="btn whatsapp" onclick="shareQuoteWhatsApp()">Send on WhatsApp</button>
+</div>
+<p class="note">Prices, GST and the grand total are shown in the PDF quotation. Final price is confirmed by Sani Steels Pvt Ltd after site measurement.</p>
+</div>
+</div></section>
+
+<section id="contact" class="section dark"><div class="container contact-grid">
+<div><p class="eyebrow">CONTACT</p><h2 id="contactName">Sani Steels Pvt Ltd</h2><p id="contactAddress"></p><p id="contactHours"></p></div>
+<div class="contact-card"><div><b>Call</b><br><a id="phoneLink"></a><br><br><b>WhatsApp / Enquiry</b><br><a id="inquiryLink"></a><br><br><b>Email</b><br><a id="emailLink"></a></div><a class="btn whatsapp" id="contactWhatsApp" target="_blank">WhatsApp Now</a></div>
+</div></section>
+</main>
+<footer><div class="container">© <span id="year"></span> <span id="footerName">Sani Steels Pvt Ltd</span></div></footer>
+
+<div class="modal" id="quoteBuilder"><div class="modal-card">
+<button class="close" onclick="closeQuoteBuilder()">×</button>
+<p class="eyebrow">ADD TO QUOTATION</p>
+
+<div class="qb-preview"><img id="qbImage" alt=""><p id="qbDesc" class="note"></p></div>
+
+<label>Window / Door Type<select id="qbProduct"></select></label>
+<label>Measure in<select id="qbUnit"><option value="mm">Millimetres (mm)</option><option value="ft">Feet</option><option value="in">Inches</option></select></label>
+
+<div class="two">
+<label id="qbWidthLabel-w"><span id="qbWidthLabel">Width (millimetres)</span><input id="qbWidth" type="number" min="0" value="1200"></label>
+<label id="qbHeightLabel-w"><span id="qbHeightLabel">Height (millimetres)</span><input id="qbHeight" type="number" min="0" value="1500"></label>
+</div>
+<label>Quantity<input id="qbQty" type="number" step="1" min="1" value="1"></label>
+
+<div class="estimate"><span>Area per unit</span><b id="qbArea">—</b></div>
+<div class="estimate"><span>Total area</span><b id="qbTotalArea">—</b></div>
+
+<button class="btn primary full" onclick="addQuoteItem()">Add to Quotation</button>
+<p class="note">Pricing is applied when your PDF quotation is generated.</p>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="data.js"></script>
+<script src="firebase-config.js"></script>
+<script src="store.js"></script>
+<script src="app.js"></script>
+<script src="quote.js"></script>
+</body></html>
