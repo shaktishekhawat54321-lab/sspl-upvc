@@ -81,7 +81,7 @@ const DEFAULT_DATA = {
       },
       {
         "key": "areaSqft",
-        "label": "Area\n(sq.ft)",
+        "label": "Area (sq.ft)",
         "show": true,
         "align": "right",
         "width": 16
@@ -96,21 +96,21 @@ const DEFAULT_DATA = {
       },
       {
         "key": "totalArea",
-        "label": "Total Area\n(sq.ft)",
+        "label": "Total Area (sq.ft)",
         "show": true,
         "align": "right",
         "width": 18
       },
       {
         "key": "weight",
-        "label": "Weight\n(kg)",
+        "label": "Weight (kg)",
         "show": false,
         "align": "right",
         "width": 16
       },
       {
         "key": "rate",
-        "label": "Rate\n(Rs/sq.ft)",
+        "label": "Rate (Rs/sq.ft)",
         "show": true,
         "align": "right",
         "width": 18

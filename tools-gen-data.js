@@ -99,11 +99,14 @@ const COLUMNS = [
   { key:'profile',   label:'Profile System',      show:false, align:'left',  width:30 },
   { key:'glass',     label:'Glass',               show:false, align:'left',  width:30 },
   { key:'size',      label:'Size (mm)',           show:true,  align:'center', width:24 },
-  { key:'areaSqft',  label:'Area\n(sq.ft)',       show:true,  align:'right', width:16 },
+  // Labels stay single-line: the layout editor uses text inputs, which
+  // cannot hold a newline, so "Area\n(sq.ft)" came back as "Area(sq.ft)".
+  // The PDF wraps its own headers.
+  { key:'areaSqft',  label:'Area (sq.ft)',        show:true,  align:'right', width:16 },
   { key:'qty',       label:'Qty',                 show:true,  locked:true,  align:'center', width:10 },
-  { key:'totalArea', label:'Total Area\n(sq.ft)', show:true,  align:'right', width:18 },
-  { key:'weight',    label:'Weight\n(kg)',        show:false, align:'right', width:16 },
-  { key:'rate',      label:'Rate\n(Rs/sq.ft)',    show:true,  align:'right', width:18 },
+  { key:'totalArea', label:'Total Area (sq.ft)',  show:true,  align:'right', width:18 },
+  { key:'weight',    label:'Weight (kg)',         show:false, align:'right', width:16 },
+  { key:'rate',      label:'Rate (Rs/sq.ft)',     show:true,  align:'right', width:18 },
   { key:'amount',    label:'Amount (Rs)',         show:true,  locked:true,  align:'right', width:0 },
 ];
 

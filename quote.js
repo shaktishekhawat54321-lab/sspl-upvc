@@ -228,12 +228,35 @@ function quoteTotals() {
 
     const sub = quote.items.reduce((s, i) => s + itemAmount(i), 0);
 
-    const gst = sub * gstRate() / 100;
+    const rows = Array.isArray(data.settings.totalRows) ? data.settings.totalRows : [];
+
+    const on = k => rows.filter(r => r.kind === k && r.show !== false);
+
+    const charges = on("charge").reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const deducts = on("deduct").reduce((s, r) => s + (Number(r.amount) || 0), 0);
+
+    // GST applies to the project cost, charges included — the basis the
+    // reference quotation uses.
+    const project = sub + charges - deducts;
+
+    const gst = project * gstRate() / 100;
+
+    const area = quote.items.reduce((s, i) => s + itemArea(i).billedTotal, 0);
+    const weight = quote.items.reduce((s, i) => s + (Number(i.kgPerSqft) || 0) * itemArea(i).billedTotal, 0);
+    const pieces = quote.items.reduce((s, i) => s + (Number(i.qty) || 0), 0);
 
     return {
         sub: sub,
+        charges: charges,
+        deducts: deducts,
+        project: project,
         gst: gst,
-        grand: sub + gst
+        grand: project + gst,
+        area: area,
+        weight: weight,
+        pieces: pieces,
+        avgExGst: area ? project / area : 0,
+        avgIncGst: area ? (project + gst) / area : 0
     };
 
 }
@@ -254,10 +277,14 @@ function openQuoteBuilder(productId) {
 
     if (productId) sel.value = productId;
 
+    const codeEl = document.getElementById("qbCode");
+
+    if (codeEl) codeEl.value = "W" + (quote.items.length + 1);
+
     document.getElementById("qbUnit").value = quoteUnit;
 
     syncUnitInputs();
-    qbPreview();
+    onProductChange();
 
     document.getElementById("quoteBuilder").classList.add("show");
 
@@ -296,6 +323,19 @@ function syncUnitInputs() {
 }
 
 
+function onProductChange() {
+
+    const p = data.products.find(
+        x => x.id === document.getElementById("qbProduct").value
+    );
+
+    renderSpecInputs(p);
+
+    qbPreview();
+
+}
+
+
 function qbPreview() {
 
     const p = data.products.find(
@@ -327,22 +367,108 @@ function qbPreview() {
 }
 
 
+// ---------------------------------------------------------------
+// SPECIFICATION INPUTS
+//
+// Built from settings.specFields, so switching a field off in the
+// admin panel removes it here and from the quotation, and a field
+// added there appears here with no code change. Fields with a
+// `source` become dropdowns from that option list; the rest are free
+// text.
+// ---------------------------------------------------------------
+
+function visibleSpecFields() {
+
+    const f = data.settings.specFields;
+
+    return (Array.isArray(f) ? f : []).filter(x => x && x.show !== false);
+
+}
+
+
+function renderSpecInputs(product) {
+
+    const box = document.getElementById("qbSpec");
+
+    if (!box) return;
+
+    const fields = visibleSpecFields();
+
+    if (!fields.length) {
+        document.getElementById("qbSpecWrap").style.display = "none";
+        return;
+    }
+
+    document.getElementById("qbSpecWrap").style.display = "block";
+
+    const kind = (product && product.config && product.config.kind) || "fixed";
+    const presets = (data.settings.specDefaults || {})[kind] || {};
+
+    box.innerHTML = fields.map(f => {
+
+        const opts = f.source && data.settings.options
+            ? (data.settings.options[f.source] || [])
+            : null;
+
+        const preset = presets[f.key] || "";
+
+        if (opts && opts.length) {
+            return `<label>${esc(f.label)}<select data-spec="${esc(f.key)}">`
+                + `<option value=""></option>`
+                + opts.map(o =>
+                    `<option value="${esc(o)}"${o === preset ? " selected" : ""}>${esc(o)}</option>`
+                ).join("")
+                + `</select></label>`;
+        }
+
+        return `<label>${esc(f.label)}<input data-spec="${esc(f.key)}" value="${esc(preset)}"></label>`;
+
+    }).join("");
+
+}
+
+
+function readSpec() {
+
+    const out = {};
+
+    document.querySelectorAll("#qbSpec [data-spec]").forEach(el => {
+        out[el.dataset.spec] = el.value;
+    });
+
+    return out;
+
+}
+
+
+function esc(s) {
+    return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+
 function readBuilder() {
 
     const p = data.products.find(
         x => x.id === document.getElementById("qbProduct").value
     );
 
+    const codeEl = document.getElementById("qbCode");
+
     return {
         id: p ? p.id : "",
         name: p ? p.name : "",
         image: p ? p.image : "",
+        code: codeEl ? codeEl.value.trim() : "",
         unit: quoteUnit,
         width: parseFloat(document.getElementById("qbWidth").value) || 0,
         height: parseFloat(document.getElementById("qbHeight").value) || 0,
         qty: parseInt(document.getElementById("qbQty").value) || 1,
         // rate is pulled from the admin catalogue, never typed by the customer
-        rate: p ? Number(p.rate) || 0 : 0
+        rate: p ? Number(p.rate) || 0 : 0,
+        kgPerSqft: p && p.config ? Number(p.config.kgPerSqft) || 0 : 0,
+        spec: readSpec()
     };
 
 }
@@ -502,404 +628,37 @@ function imageToPng(src, targetW) {
 // PDF
 // -------------------------------------------------------------------
 
-const NAVY = [29, 42, 68];
-const GREEN = [22, 138, 74];
-const GREY = [105, 114, 130];
-const LINE = [222, 227, 235];
-
-
+// The document itself is built in quote-pdf.js. This wrapper keeps the
+// quotation record, so history works whichever layout is in use.
 async function buildQuotePdf() {
 
-    const cust = readCustomer();
+    const r = await QPDF.build();
 
-    if (!cust.name) {
-        alert("Please enter the customer name.");
-        document.getElementById("custName").focus();
-        return null;
-    }
+    if (!r) return null;
 
-    if (!quote.items.length) {
-        alert("Please add at least one window or door.");
-        return null;
-    }
-
-    const { jsPDF } = window.jspdf;
-
-    const doc = new jsPDF({ unit: "mm", format: "a4" });
-
-    const PW = doc.internal.pageSize.getWidth();   // 210
-    const M = 14;                                   // page margin
-
-    const s = data.settings;
-
-    // ---------- header ----------
-
-    // 62 mm wide at ~300 dpi
-    const logo = await imageToPng(s.logo, 740);
-
-    let y = M;
-
-    if (logo) {
-
-        const lw = 62;
-        const lh = lw * (logo.h / logo.w);
-
-        doc.addImage(logo.data, "PNG", M, y, lw, lh, "sspllogo", "MEDIUM");
-
-        y += lh;
-
-    } else {
-
-        doc.setFont("helvetica", "bold").setFontSize(18).setTextColor(...NAVY);
-        doc.text(s.businessName, M, y + 6);
-
-        y += 10;
-
-    }
-
-    // company address under the logo
-    doc.setFont("helvetica", "normal").setFontSize(7.5).setTextColor(...GREY);
-
-    const addr = doc.splitTextToSize(s.address || "", 96);
-
-    doc.text(addr, M, y + 4);
-
-    doc.text(
-        "Phone / WhatsApp: " + (s.inquiry || "") + "   |   " + (s.email || ""),
-        M,
-        y + 4 + addr.length * 3.4
-    );
-
-    // ---------- quotation meta (right) ----------
-
-    doc.setFont("helvetica", "bold").setFontSize(22).setTextColor(...NAVY);
-    doc.text("QUOTATION", PW - M, M + 7, { align: "right" });
-
-    const today = new Date();
-
-    const valid = new Date(today);
-    valid.setDate(valid.getDate() + (Number(s.validityDays) || 15));
-
-    const qno = quoteNumber();
-
-    doc.setFont("helvetica", "normal").setFontSize(8.5).setTextColor(60, 60, 60);
-
-    const meta = [
-        ["Quotation No.", qno],
-        ["Date", fmtDate(today)],
-        ["Valid Until", fmtDate(valid)]
-    ];
-
-    let my = M + 14;
-
-    meta.forEach(([k, v]) => {
-        doc.setTextColor(...GREY);
-        doc.text(k, PW - M - 34, my, { align: "right" });
-        doc.setTextColor(30, 30, 30);
-        doc.setFont("helvetica", "bold");
-        doc.text(String(v), PW - M, my, { align: "right" });
-        doc.setFont("helvetica", "normal");
-        my += 5;
-    });
-
-    y = Math.max(y + 4 + addr.length * 3.4, my) + 6;
-
-    // green rule
-    doc.setDrawColor(...GREEN).setLineWidth(0.8);
-    doc.line(M, y, PW - M, y);
-
-    y += 7;
-
-    // ---------- customer ----------
-
-    doc.setFont("helvetica", "bold").setFontSize(9).setTextColor(...NAVY);
-    doc.text("QUOTATION FOR", M, y);
-
-    y += 5;
-
-    doc.setFont("helvetica", "bold").setFontSize(12).setTextColor(20, 20, 20);
-    doc.text(cust.name, M, y);
-
-    y += 5;
-
-    doc.setFont("helvetica", "normal").setFontSize(8.5).setTextColor(...GREY);
-
-    if (cust.phone) {
-        doc.text("Phone: " + cust.phone, M, y);
-        y += 4;
-    }
-
-    if (cust.address) {
-        const ca = doc.splitTextToSize(cust.address, 110);
-        doc.text(ca, M, y);
-        y += ca.length * 4;
-    }
-
-    y += 4;
-
-    // ---------- items table ----------
-
-    // Pre-render every drawing so autoTable can paint them synchronously.
-    const pngs = {};
-
-    for (const it of quote.items) {
-        const key = itemDrawing(it);
-        if (!pngs[key]) {
-            // ~20 mm wide in the table at ~300 dpi
-            pngs[key] = await imageToPng(key, 300);
-        }
-    }
-
-    const body = quote.items.map((it, i) => {
-
-        const u = UNITS[it.unit];
-        const a = itemArea(it);
-
-        return [
-            String(i + 1),
-            "",                                   // drawing painted in the hook
-            it.name,
-            u.fmt(it.width) + " x " + u.fmt(it.height),
-            a.billedSingle.toFixed(2) + (a.minApplied ? " *" : ""),
-            String(it.qty),
-            a.billedTotal.toFixed(2),
-            money(it.rate),
-            money(itemAmount(it))
-        ];
-
-    });
-
-    doc.autoTable({
-        startY: y,
-        head: [[
-            "#", "Drawing", "Type / Description", "Size",
-            "Area\n(sq.ft)", "Qty", "Total Area\n(sq.ft)",
-            "Rate\n(Rs/sq.ft)", "Amount (Rs)"
-        ]],
-        body: body,
-        theme: "grid",
-        margin: { left: M, right: M },
-        styles: {
-            font: "helvetica",
-            fontSize: 7.8,
-            cellPadding: 2,
-            lineColor: LINE,
-            lineWidth: 0.2,
-            textColor: [35, 35, 35],
-            valign: "middle"
-        },
-        headStyles: {
-            fillColor: NAVY,
-            textColor: [255, 255, 255],
-            fontSize: 7.2,
-            fontStyle: "bold",
-            halign: "center",
-            valign: "middle"
-        },
-        columnStyles: {
-            0: { cellWidth: 7, halign: "center" },
-            1: { cellWidth: 22 },
-            2: { cellWidth: 40 },
-            3: { cellWidth: 26, halign: "center" },
-            4: { cellWidth: 16, halign: "right" },
-            5: { cellWidth: 10, halign: "center" },
-            6: { cellWidth: 18, halign: "right" },
-            7: { cellWidth: 18, halign: "right" },
-            8: { halign: "right", fontStyle: "bold" }
-        },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
-        // reserve height for the drawing
-        didParseCell: d => {
-            if (d.section === "body" && d.column.index === 1) {
-                d.cell.styles.minCellHeight = 16;
-            }
-        },
-        didDrawCell: d => {
-
-            if (d.section !== "body" || d.column.index !== 1) return;
-
-            const it = quote.items[d.row.index];
-
-            const png = it && pngs[itemDrawing(it)];
-
-            if (!png) return;
-
-            const maxW = d.cell.width - 3;
-            const maxH = d.cell.height - 3;
-
-            const ratio = png.w / png.h;
-
-            let w = maxW, h = w / ratio;
-
-            if (h > maxH) { h = maxH; w = h * ratio; }
-
-            // alias = image src, so a repeated type is stored once
-            doc.addImage(
-                png.data,
-                "PNG",
-                d.cell.x + (d.cell.width - w) / 2,
-                d.cell.y + (d.cell.height - h) / 2,
-                w,
-                h,
-                "d" + d.row.index,
-                "MEDIUM"
-            );
-
-        }
-    });
-
-    y = doc.lastAutoTable.finalY + 4;
-
-    // footnote if any row was lifted to the minimum billable area
-    if (quote.items.some(it => itemArea(it).minApplied)) {
-
-        doc.setFont("helvetica", "italic").setFontSize(6.8).setTextColor(...GREY);
-
-        doc.text(
-            "* Billed at the minimum area of " + minArea().toFixed(2) +
-            " sq.ft per unit (actual size is smaller).",
-            M,
-            y + 1
-        );
-
-        y += 4;
-
-    }
-
-    y += 4;
-
-    // ---------- totals ----------
-
-    const t = quoteTotals();
-
-    const boxW = 78;
-    const boxX = PW - M - boxW;
-
-    const rows = [
-        ["Subtotal", money(t.sub)],
-        ["GST @ " + gstRate() + "%", money(t.gst)]
-    ];
-
-    doc.setFontSize(9);
-
-    rows.forEach(([k, v]) => {
-        doc.setFont("helvetica", "normal").setTextColor(...GREY);
-        doc.text(k, boxX + 2, y);
-        doc.setFont("helvetica", "normal").setTextColor(30, 30, 30);
-        doc.text(v, PW - M - 2, y, { align: "right" });
-        y += 5.5;
-    });
-
-    doc.setDrawColor(...LINE).setLineWidth(0.3);
-    doc.line(boxX, y - 3.5, PW - M, y - 3.5);
-
-    // grand total band
-    doc.setFillColor(...NAVY);
-    doc.rect(boxX, y - 1, boxW, 10, "F");
-
-    doc.setFont("helvetica", "bold").setFontSize(10).setTextColor(255, 255, 255);
-    doc.text("GRAND TOTAL", boxX + 2, y + 5.5);
-    doc.text("Rs " + money(t.grand), PW - M - 2, y + 5.5, { align: "right" });
-
-    // amount in words (left of the totals)
-    doc.setFont("helvetica", "italic").setFontSize(8).setTextColor(...GREY);
-
-    const words = doc.splitTextToSize(
-        "Amount in words: " + amountInWords(t.grand),
-        PW - 2 * M - boxW - 6
-    );
-
-    doc.text(words, M, y + 2);
-
-    y += 16;
-
-    // ---------- terms ----------
-
-    const terms = Array.isArray(s.terms) ? s.terms : [];
-
-    if (terms.length) {
-
-        // start a new page if there is no room
-        if (y > 236) { doc.addPage(); y = M; }
-
-        doc.setFont("helvetica", "bold").setFontSize(9).setTextColor(...NAVY);
-        doc.text("TERMS & CONDITIONS", M, y);
-
-        y += 4;
-
-        doc.setDrawColor(...GREEN).setLineWidth(0.5);
-        doc.line(M, y, M + 34, y);
-
-        y += 5;
-
-        doc.setFont("helvetica", "normal").setFontSize(7.6).setTextColor(70, 75, 85);
-
-        terms.forEach((line, i) => {
-
-            const wrapped = doc.splitTextToSize((i + 1) + ". " + line, PW - 2 * M - 4);
-
-            if (y + wrapped.length * 3.4 > 276) { doc.addPage(); y = M; }
-
-            doc.text(wrapped, M + 1, y);
-
-            y += wrapped.length * 3.4 + 1.4;
-
-        });
-
-    }
-
-    // ---------- footer on every page ----------
-
-    const pages = doc.internal.getNumberOfPages();
-
-    for (let p = 1; p <= pages; p++) {
-
-        doc.setPage(p);
-
-        const PH = doc.internal.pageSize.getHeight();
-
-        doc.setDrawColor(...LINE).setLineWidth(0.3);
-        doc.line(M, PH - 14, PW - M, PH - 14);
-
-        doc.setFont("helvetica", "normal").setFontSize(7).setTextColor(...GREY);
-
-        doc.text(
-            s.businessName + "  |  " + (s.inquiry || "") + "  |  " + (s.email || ""),
-            M,
-            PH - 9.5
-        );
-
-        doc.text("Page " + p + " of " + pages, PW - M, PH - 9.5, { align: "right" });
-
-        doc.setFontSize(6.5);
-        doc.text(
-            "This is a computer-generated quotation. Prices are subject to final site measurement.",
-            M,
-            PH - 6
-        );
-
-    }
-
-    // Record the quotation. In cloud mode this lands in Firestore so the
-    // owner sees it on any device; otherwise it stays on this browser.
     if (window.Store) {
 
+        const t = r.totals;
+
         Store.saveQuotation({
-            qno: qno,
-            date: fmtDate(today),
-            customer: cust.name,
-            phone: cust.phone,
-            address: cust.address,
+            qno: r.qno,
+            date: fmtDate(new Date()),
+            customer: quote.customer.name,
+            phone: quote.customer.phone,
+            address: quote.customer.address,
             itemCount: quote.items.length,
             items: quote.items.map(it => ({
+                code: it.code || '',
                 name: it.name,
-                size: UNITS[it.unit].fmt(it.width) + " x " + UNITS[it.unit].fmt(it.height),
+                size: UNITS[it.unit].fmt(it.width) + ' x ' + UNITS[it.unit].fmt(it.height),
                 qty: it.qty,
                 areaSqft: Number(itemArea(it).billedTotal.toFixed(2)),
                 rate: Number(it.rate) || 0,
-                amount: Number(itemAmount(it).toFixed(2))
+                amount: Number(itemAmount(it).toFixed(2)),
+                spec: it.spec || {}
             })),
             subtotal: Number(t.sub.toFixed(2)),
+            charges: Number(t.charges.toFixed(2)),
             gstRate: gstRate(),
             gst: Number(t.gst.toFixed(2)),
             grand: money(t.grand)
@@ -907,15 +666,7 @@ async function buildQuotePdf() {
 
     }
 
-
-    const safeName = cust.name.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
-
-    return {
-        doc: doc,
-        filename: "SSPL-Quotation-" + safeName + "-" + qno.split("/").pop() + ".pdf",
-        totals: t,
-        qno: qno
-    };
+    return r;
 
 }
 
@@ -1059,7 +810,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     on("qbUnit", "change", syncUnitInputs);
-    on("qbProduct", "change", qbPreview);
+    on("qbProduct", "change", () => { onProductChange(); });
 
     ["qbWidth", "qbHeight", "qbQty"].forEach(id => {
         on(id, "input", e => {

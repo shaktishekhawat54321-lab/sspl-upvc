@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin Panel | Sani Steels Pvt Ltd</title><link rel="stylesheet" href="style.css?v=1794218059"></head>
+<title>Admin Panel | Sani Steels Pvt Ltd</title><link rel="stylesheet" href="style.css?v=1794218793"></head>
 <body class="admin-body">
 <header class="topbar"><div class="container nav"><a class="brand" href="index.html">Sani Steels Pvt Ltd <span>Admin</span></a><a class="btn outline" href="index.html">Customer Website</a></div></header>
 <main class="section"><div class="container">
@@ -48,6 +48,41 @@
 
 <div class="admin-card"><h2>Change Admin Password</h2><div class="two"><input id="newPassword" type="password" placeholder="New password"><input id="newPassword2" type="password" placeholder="Repeat password"></div><button class="btn outline" onclick="changePassword()">Change Password</button></div>
 
+<div class="admin-card"><h2>Quotation Layout</h2>
+<p class="note">Tick what appears on the PDF quotation and rename anything. Locked rows cannot be switched off because the quotation needs them. Add your own columns and fields at the end of each list.</p>
+
+<h3>Line Item Columns</h3>
+<div id="colEditor" class="layout-list"></div>
+<button class="btn outline small" onclick="addLayoutRow('columns')">+ Add Column</button>
+
+<h3>Specification Fields</h3>
+<p class="note">Shown per item, and offered as dropdowns in the quotation builder.</p>
+<div id="specEditor" class="layout-list"></div>
+<button class="btn outline small" onclick="addLayoutRow('specFields')">+ Add Field</button>
+
+<h3>Totals Rows</h3>
+<p class="note">Charges such as transportation take an amount; the rest are calculated.</p>
+<div id="totalEditor" class="layout-list"></div>
+<button class="btn outline small" onclick="addLayoutRow('totalRows')">+ Add Charge</button>
+
+<h3>Dropdown Option Lists</h3>
+<p class="note">One option per line. These fill the specification dropdowns.</p>
+<div id="optEditor"></div>
+
+<button class="btn primary" onclick="saveLayout()">Save Quotation Layout</button></div>
+
+<div class="admin-card"><h2>Quotation Wording</h2>
+<label>Show cover letter <input type="checkbox" id="showCoverLetter"></label>
+<label>Cover Letter <span class="note">(one paragraph per line)</span><textarea id="coverLetter" rows="8"></textarea></label>
+<label>Show installation pre-requisites <input type="checkbox" id="showPrerequisites"></label>
+<label>Pre-Requisites for Installation <span class="note">(one per line)</span><textarea id="prerequisites" rows="8"></textarea></label>
+<label>Show acceptance &amp; signature block <input type="checkbox" id="showAcceptance"></label>
+<label>Acceptance Wording<textarea id="acceptanceText" rows="3"></textarea></label>
+<label>Show bank details <input type="checkbox" id="showBankDetails"></label>
+<label>Bank Details <span class="note">(one per line)</span><textarea id="bankDetails" rows="6"></textarea></label>
+<div class="two"><label>Website<input id="website"></label><label>GSTIN<input id="gstin"></label></div>
+<button class="btn primary" onclick="saveWording()">Save Quotation Wording</button></div>
+
 <div class="admin-card"><h2>Cloud Sync</h2>
 <p class="note" id="cloudStatus">Checking…</p>
 <div id="cloudTools" style="display:none">
@@ -62,7 +97,7 @@
 
 <div class="admin-card"><h2>Backup</h2><p class="note">Export your settings before changing phones or browsers.</p><button class="btn outline" onclick="exportData()">Download Backup</button> <label class="file-btn">Restore Backup<input type="file" accept=".json" onchange="importData(event)"></label></div>
 </div></div></main>
-<script src="data.js?v=1794218059"></script>
-<script src="drawing.js?v=1794218059"></script>
-<script src="firebase-config.js?v=1794218059"></script>
-<script src="store.js?v=1794218059"></script><script src="admin.js?v=1794218059"></script></body></html>
+<script src="data.js?v=1794218793"></script>
+<script src="drawing.js?v=1794218793"></script>
+<script src="firebase-config.js?v=1794218793"></script>
+<script src="store.js?v=1794218793"></script><script src="admin.js?v=1794218793"></script></body></html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sani Steels Pvt Ltd</title><link rel="stylesheet" href="style.css?v=1794218059">
+<title>Sani Steels Pvt Ltd</title><link rel="stylesheet" href="style.css?v=1794218793">
 </head>
 <body>
 <header class="topbar"><div class="container nav">
@@ -71,10 +71,16 @@
 <label id="qbWidthLabel-w"><span id="qbWidthLabel">Width (millimetres)</span><input id="qbWidth" type="number" min="0" value="1200"></label>
 <label id="qbHeightLabel-w"><span id="qbHeightLabel">Height (millimetres)</span><input id="qbHeight" type="number" min="0" value="1500"></label>
 </div>
+<div class="two">
 <label>Quantity<input id="qbQty" type="number" step="1" min="1" value="1"></label>
+<label>Code<input id="qbCode" placeholder="W1"></label>
+</div>
 
 <div class="estimate"><span>Area per unit</span><b id="qbArea">—</b></div>
 <div class="estimate"><span>Total area</span><b id="qbTotalArea">—</b></div>
+
+<div id="qbSpecWrap"><p class="eyebrow" style="margin-top:20px">SPECIFICATION</p>
+<div id="qbSpec"></div></div>
 
 <button class="btn primary full" onclick="addQuoteItem()">Add to Quotation</button>
 <p class="note">Pricing is applied when your PDF quotation is generated.</p>
@@ -82,10 +88,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="data.js?v=1794218059"></script>
-<script src="drawing.js?v=1794218059"></script>
-<script src="firebase-config.js?v=1794218059"></script>
-<script src="store.js?v=1794218059"></script>
-<script src="app.js?v=1794218059"></script>
-<script src="quote.js?v=1794218059"></script>
+<script src="data.js?v=1794218793"></script>
+<script src="drawing.js?v=1794218793"></script>
+<script src="firebase-config.js?v=1794218793"></script>
+<script src="store.js?v=1794218793"></script>
+<script src="app.js?v=1794218793"></script>
+<script src="quote.js?v=1794218793"></script>
+<script src="quote-pdf.js?v=1794218793"></script>
 </body></html>

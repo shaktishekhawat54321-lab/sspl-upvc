@@ -3,7 +3,7 @@ const hash=x=>btoa(unescape(encodeURIComponent(x)));
 function login(){let p=adminPassword.value, saved=localStorage.getItem("ssplAdminHash")||hash("SSPL@123");if(hash(p)===saved){sessionStorage.setItem("ssplAdmin","yes");show()}else alert("Wrong password")}
 function show(){loginBox.style.display="none";adminPanel.style.display="block";loadForm();if(typeof refreshCloudUi==="function")refreshCloudUi();if(typeof loadQuoteHistory==="function")loadQuoteHistory()}
 function logout(){sessionStorage.removeItem("ssplAdmin");Promise.resolve(Store.signOut()).finally(()=>location.reload())}
-function loadForm(){if(!data.settings.phone)data.settings.phone=data.settings.whatsapp||"7005132355";if(!data.settings.inquiry)data.settings.inquiry=data.settings.whatsapp||data.settings.phone;if(!data.settings.logo)data.settings.logo="images/sspl-logo.svg";businessName.value=data.settings.businessName;phone.value=data.settings.phone;inquiry.value=data.settings.inquiry;document.getElementById("email").value=data.settings.email||DEFAULT_DATA.settings.email;document.getElementById("hours").value=data.settings.hours||DEFAULT_DATA.settings.hours;address.value=data.settings.address;logoPreview.src=data.settings.logo;loadQuoteSettings();heroEyebrow.value=data.settings.heroEyebrow;heroTitle.value=data.settings.heroTitle;heroText.value=data.settings.heroText;renderEditors()}
+function loadForm(){if(!data.settings.phone)data.settings.phone=data.settings.whatsapp||"7005132355";if(!data.settings.inquiry)data.settings.inquiry=data.settings.whatsapp||data.settings.phone;if(!data.settings.logo)data.settings.logo="images/sspl-logo.svg";businessName.value=data.settings.businessName;phone.value=data.settings.phone;inquiry.value=data.settings.inquiry;document.getElementById("email").value=data.settings.email||DEFAULT_DATA.settings.email;document.getElementById("hours").value=data.settings.hours||DEFAULT_DATA.settings.hours;address.value=data.settings.address;logoPreview.src=data.settings.logo;loadQuoteSettings();renderLayoutEditor();loadWording();heroEyebrow.value=data.settings.heroEyebrow;heroTitle.value=data.settings.heroTitle;heroText.value=data.settings.heroText;renderEditors()}
 function logoPreview(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{data.settings.logo=r.result;document.getElementById("logoPreview").src=r.result};r.readAsDataURL(f)}
 function saveSettings(){data.settings.businessName=businessName.value.trim()||"Sani Steels Pvt Ltd";data.settings.phone=phone.value.trim();data.settings.inquiry=inquiry.value.trim();data.settings.whatsapp=data.settings.inquiry;data.settings.email=document.getElementById("email").value.trim();data.settings.hours=document.getElementById("hours").value.trim();data.settings.address=address.value.trim();data.settings.heroEyebrow=heroEyebrow.value;data.settings.heroTitle=heroTitle.value;data.settings.heroText=heroText.value;Store.saveSettings(data.settings).then(r=>alert(r.ok?"Website settings saved to "+r.where+".":"Saved on this device, but the cloud refused:\n\n"+r.error))}
 function renderEditors(){productEditor.innerHTML=data.products.map((p,i)=>`<div class="product-admin"><div class="product-admin-grid"><img src="${DRAW.dataUri(p)}" alt=""><div><label>Product Name<input data-i="${i}" data-k="name" value="${esc(p.name)}"></label><label>Category<input data-i="${i}" data-k="cat" value="${esc(p.cat)}"></label></div><div><label>Rate ₹/sq.ft.<input type="number" data-i="${i}" data-k="rate" value="${p.rate}"></label><label>Description<input data-i="${i}" data-k="text" value="${esc(p.text)}"></label><label>Photo <input type="file" accept="image/*" onchange="photo(event,${i})"></label></div></div></div>`).join("")}
@@ -96,3 +96,117 @@ Store.init().then(()=>{
     if(el("adminPanel").style.display==="block") loadForm();
   });
 });
+
+// ===================================================================
+// QUOTATION LAYOUT EDITOR
+//
+// Drives settings.columns / specFields / totalRows / options. Rows are
+// rendered from the data, so a column added here needs no code change
+// to appear on the quotation.
+// ===================================================================
+
+const LAYOUT_BOXES = { columns:"colEditor", specFields:"specEditor", totalRows:"totalEditor" };
+
+function layoutRow(list, item, i){
+  const locked = !!item.locked;
+  const isCharge = list==="totalRows" && (item.kind==="charge" || item.kind==="deduct");
+  return `<div class="layout-row">
+    <label class="lr-show"><input type="checkbox" data-l="${list}" data-i="${i}" data-k="show"
+      ${item.show!==false?"checked":""} ${locked?"disabled":""}> Show</label>
+    <input class="lr-label" data-l="${list}" data-i="${i}" data-k="label" value="${esc(item.label||"")}">
+    ${isCharge?`<input class="lr-amt" type="number" step="1" data-l="${list}" data-i="${i}" data-k="amount"
+      value="${Number(item.amount)||0}" title="Amount in rupees">`:`<span class="lr-amt"></span>`}
+    <span class="lr-tag">${locked?"required":esc(item.key||"")}</span>
+    ${locked?"":`<button class="linkbtn" onclick="removeLayoutRow('${list}',${i})">Remove</button>`}
+  </div>`;
+}
+
+function renderLayoutEditor(){
+  Object.keys(LAYOUT_BOXES).forEach(list=>{
+    const box=el(LAYOUT_BOXES[list]); if(!box) return;
+    const arr=data.settings[list]||[];
+    box.innerHTML=arr.map((item,i)=>layoutRow(list,item,i)).join("");
+  });
+  const ob=el("optEditor");
+  if(ob){
+    const opts=data.settings.options||{};
+    ob.innerHTML=Object.keys(opts).map(k=>
+      `<label>${esc(k)}<textarea data-opt="${esc(k)}" rows="4">${esc((opts[k]||[]).join("\n"))}</textarea></label>`
+    ).join("");
+  }
+}
+
+// Read the on-screen edits back into data. Adding or removing a row
+// re-renders the list, so this must run first or any unsaved ticks,
+// renames and amounts are silently thrown away.
+function collectLayoutEdits(){
+  document.querySelectorAll("[data-l]").forEach(inp=>{
+    const list=inp.dataset.l, i=+inp.dataset.i, k=inp.dataset.k;
+    const row=(data.settings[list]||[])[i]; if(!row) return;
+    if(k==="show"){ if(!row.locked) row.show=inp.checked }
+    else if(k==="amount"){ row.amount=Number(inp.value)||0 }
+    else { row[k]=inp.value }
+  });
+  document.querySelectorAll("[data-opt]").forEach(ta=>{
+    data.settings.options[ta.dataset.opt]=ta.value.split("\n").map(s=>s.trim()).filter(Boolean);
+  });
+}
+
+function addLayoutRow(list){
+  collectLayoutEdits();
+  const label=prompt(list==="totalRows"?"Name of the charge (e.g. Scaffolding):":"Name of the new "+(list==="columns"?"column":"field")+":");
+  if(!label) return;
+  const key=label.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")||("custom"+Date.now());
+  if((data.settings[list]||[]).some(x=>x.key===key)) return alert("A row with that name already exists.");
+  const row={key:key,label:label,show:true,custom:true};
+  if(list==="columns") row.align="left";
+  if(list==="specFields") row.source=null;
+  if(list==="totalRows"){ row.kind="charge"; row.amount=0 }
+  data.settings[list]=(data.settings[list]||[]).concat([row]);
+  renderLayoutEditor();
+}
+
+function removeLayoutRow(list,i){
+  collectLayoutEdits();
+  const row=(data.settings[list]||[])[i];
+  if(!row||row.locked) return;
+  if(!confirm("Remove \""+row.label+"\" from the quotation?")) return;
+  data.settings[list].splice(i,1);
+  renderLayoutEditor();
+}
+
+function saveLayout(){
+  collectLayoutEdits();
+  Store.saveSettings(data.settings).then(r=>{
+    renderLayoutEditor();
+    alert(r.ok?"Quotation layout saved to "+r.where+".":"Saved on this device, but the cloud refused:\n\n"+r.error);
+  });
+}
+
+// ---------- wording ----------
+function loadWording(){
+  const S=data.settings,D=DEFAULT_DATA.settings;
+  const lines=(v,d)=>(Array.isArray(v)&&v.length?v:d).join("\n");
+  el("coverLetter").value=lines(S.coverLetter,D.coverLetter);
+  el("prerequisites").value=lines(S.prerequisites,D.prerequisites);
+  el("bankDetails").value=lines(S.bankDetails,D.bankDetails);
+  el("acceptanceText").value=S.acceptanceText||D.acceptanceText;
+  el("website").value=S.website||"";
+  el("gstin").value=S.gstin||"";
+  ["showCoverLetter","showPrerequisites","showAcceptance","showBankDetails"].forEach(k=>{
+    el(k).checked = S[k]!==false;
+  });
+}
+
+function saveWording(){
+  const S=data.settings;
+  const lines=id=>el(id).value.split("\n").map(s=>s.trim()).filter(Boolean);
+  S.coverLetter=lines("coverLetter");
+  S.prerequisites=lines("prerequisites");
+  S.bankDetails=lines("bankDetails");
+  S.acceptanceText=el("acceptanceText").value.trim();
+  S.website=el("website").value.trim();
+  S.gstin=el("gstin").value.trim();
+  ["showCoverLetter","showPrerequisites","showAcceptance","showBankDetails"].forEach(k=>{ S[k]=el(k).checked });
+  Store.saveSettings(S).then(r=>alert(r.ok?"Quotation wording saved to "+r.where+".":"Saved on this device, but the cloud refused:\n\n"+r.error));
+}
