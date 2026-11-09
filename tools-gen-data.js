@@ -32,6 +32,33 @@ const P = [
   ['upvc-safety-grill', 'Accessories', 'uPVC Safety Grill', 'MS or aluminium security grill finished to match the uPVC frame.', 'safety-grill'],
 ];
 
+
+// How each product is actually made up, so drawing.js can draw a
+// to-scale elevation instead of a generic picture.
+const CONFIG = {
+  'upvc-sliding-2track':      { kind:'slider',   panels:2, tracks:2, handle:true },
+  'upvc-sliding-3track':      { kind:'slider',   panels:3, tracks:3, handle:true },
+  'upvc-casement-window':     { kind:'casement', panels:2, handle:true },
+  'upvc-fixed-window':        { kind:'fixed',    panels:1 },
+  'upvc-tilt-turn-window':    { kind:'tiltturn', panels:1, handle:true },
+  'upvc-top-hung-window':     { kind:'tophung',  panels:1, handle:true },
+  'upvc-ventilator':          { kind:'louvre',   panels:1 },
+  'upvc-combination-window':  { kind:'combination', openerKind:'slider', tracks:2, handle:true },
+  'upvc-bay-window':          { kind:'fixed',    panels:3 },
+  'upvc-arch-window':         { kind:'fixed',    panels:2 },
+  'upvc-mosquito-sliding':    { kind:'slider',   panels:3, tracks:3, handle:true },
+  'upvc-louvered-window':     { kind:'louvre',   panels:1 },
+  'upvc-main-door':           { kind:'casement', panels:2, handle:true },
+  'upvc-sliding-door':        { kind:'slider',   panels:2, tracks:2, handle:true },
+  'upvc-casement-door':       { kind:'casement', panels:1, handle:true },
+  'upvc-french-door':         { kind:'casement', panels:2, handle:true },
+  'upvc-bathroom-door':       { kind:'casement', panels:1, handle:true, frosted:true },
+  'upvc-balcony-door':        { kind:'combination', openerKind:'casement', handle:true },
+  'upvc-sliding-folding-door':{ kind:'slider',   panels:4, tracks:2, handle:true },
+  'upvc-mosquito-net-shutter':{ kind:'fixed',    panels:1 },
+  'upvc-safety-grill':        { kind:'fixed',    panels:1 },
+};
+
 const data = {
   settings: {
     businessName: 'Sani Steels Pvt Ltd',
@@ -67,7 +94,7 @@ const data = {
     heroImage: 'images/types/sliding-3track.svg',
   },
   products: P.map(([id, cat, name, text, svg]) => ({
-    id, cat, name, text, rate: 0, image: img(svg),
+    id, cat, name, text, rate: 0, image: img(svg), config: CONFIG[id] || { kind: 'fixed', panels: 1 },
   })),
 };
 

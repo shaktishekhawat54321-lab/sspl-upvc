@@ -39,7 +39,13 @@ const DEFAULT_DATA = {
       "name": "uPVC 2 Track Sliding Window",
       "text": "Two sliding shutters on a 2-track frame. The everyday choice for bedrooms and living rooms.",
       "rate": 0,
-      "image": "images/types/sliding-2track.svg"
+      "image": "images/types/sliding-2track.svg",
+      "config": {
+        "kind": "slider",
+        "panels": 2,
+        "tracks": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-sliding-3track",
@@ -47,7 +53,13 @@ const DEFAULT_DATA = {
       "name": "uPVC 3 Track Sliding Window",
       "text": "Three shutters on a 3-track frame — wider openings, or two glass shutters plus a mesh.",
       "rate": 0,
-      "image": "images/types/sliding-3track.svg"
+      "image": "images/types/sliding-3track.svg",
+      "config": {
+        "kind": "slider",
+        "panels": 3,
+        "tracks": 3,
+        "handle": true
+      }
     },
     {
       "id": "upvc-casement-window",
@@ -55,7 +67,12 @@ const DEFAULT_DATA = {
       "name": "uPVC Casement Window",
       "text": "Side-hung shutters that swing fully open. Best airflow and the easiest to clean.",
       "rate": 0,
-      "image": "images/types/casement-window.svg"
+      "image": "images/types/casement-window.svg",
+      "config": {
+        "kind": "casement",
+        "panels": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-fixed-window",
@@ -63,7 +80,11 @@ const DEFAULT_DATA = {
       "name": "uPVC Fixed Window",
       "text": "Sealed glass panel that does not open. Maximum light and the lowest cost per sq.ft.",
       "rate": 0,
-      "image": "images/types/fixed-window.svg"
+      "image": "images/types/fixed-window.svg",
+      "config": {
+        "kind": "fixed",
+        "panels": 1
+      }
     },
     {
       "id": "upvc-tilt-turn-window",
@@ -71,7 +92,12 @@ const DEFAULT_DATA = {
       "name": "uPVC Tilt & Turn Window",
       "text": "One handle, two actions — tilt in from the top for airflow, or swing fully open.",
       "rate": 0,
-      "image": "images/types/tilt-turn-window.svg"
+      "image": "images/types/tilt-turn-window.svg",
+      "config": {
+        "kind": "tiltturn",
+        "panels": 1,
+        "handle": true
+      }
     },
     {
       "id": "upvc-top-hung-window",
@@ -79,7 +105,12 @@ const DEFAULT_DATA = {
       "name": "uPVC Top Hung Window",
       "text": "Hinged at the top, opens outward. Stays usable in the rain.",
       "rate": 0,
-      "image": "images/types/top-hung-window.svg"
+      "image": "images/types/top-hung-window.svg",
+      "config": {
+        "kind": "tophung",
+        "panels": 1,
+        "handle": true
+      }
     },
     {
       "id": "upvc-ventilator",
@@ -87,7 +118,11 @@ const DEFAULT_DATA = {
       "name": "uPVC Ventilator",
       "text": "Compact louvered vent with an exhaust fan cut-out. For kitchens, toilets and utility areas.",
       "rate": 0,
-      "image": "images/types/ventilator.svg"
+      "image": "images/types/ventilator.svg",
+      "config": {
+        "kind": "louvre",
+        "panels": 1
+      }
     },
     {
       "id": "upvc-combination-window",
@@ -95,7 +130,13 @@ const DEFAULT_DATA = {
       "name": "uPVC Combination Window",
       "text": "Fixed glass panels either side of a sliding or openable centre.",
       "rate": 0,
-      "image": "images/types/combination-window.svg"
+      "image": "images/types/combination-window.svg",
+      "config": {
+        "kind": "combination",
+        "openerKind": "slider",
+        "tracks": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-bay-window",
@@ -103,7 +144,11 @@ const DEFAULT_DATA = {
       "name": "uPVC Bay Window",
       "text": "Three-sided window projecting outward from the wall. A feature window for living rooms.",
       "rate": 0,
-      "image": "images/types/bay-window.svg"
+      "image": "images/types/bay-window.svg",
+      "config": {
+        "kind": "fixed",
+        "panels": 3
+      }
     },
     {
       "id": "upvc-arch-window",
@@ -111,7 +156,11 @@ const DEFAULT_DATA = {
       "name": "uPVC Arch Window",
       "text": "Arched top profile for staircases, porches and elevation features.",
       "rate": 0,
-      "image": "images/types/arch-window.svg"
+      "image": "images/types/arch-window.svg",
+      "config": {
+        "kind": "fixed",
+        "panels": 2
+      }
     },
     {
       "id": "upvc-mosquito-sliding",
@@ -119,7 +168,13 @@ const DEFAULT_DATA = {
       "name": "uPVC Sliding Window with Mosquito Net",
       "text": "Sliding window with a built-in mesh shutter on its own track.",
       "rate": 0,
-      "image": "images/types/mosquito-sliding.svg"
+      "image": "images/types/mosquito-sliding.svg",
+      "config": {
+        "kind": "slider",
+        "panels": 3,
+        "tracks": 3,
+        "handle": true
+      }
     },
     {
       "id": "upvc-louvered-window",
@@ -127,7 +182,11 @@ const DEFAULT_DATA = {
       "name": "uPVC Louvered Window",
       "text": "Adjustable glass or uPVC blades. Ventilation with privacy.",
       "rate": 0,
-      "image": "images/types/louvered-window.svg"
+      "image": "images/types/louvered-window.svg",
+      "config": {
+        "kind": "louvre",
+        "panels": 1
+      }
     },
     {
       "id": "upvc-main-door",
@@ -135,7 +194,12 @@ const DEFAULT_DATA = {
       "name": "uPVC Main Door",
       "text": "Reinforced panelled entrance door with a multi-point lock. Your main entry.",
       "rate": 0,
-      "image": "images/types/main-door.svg"
+      "image": "images/types/main-door.svg",
+      "config": {
+        "kind": "casement",
+        "panels": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-sliding-door",
@@ -143,7 +207,13 @@ const DEFAULT_DATA = {
       "name": "uPVC Sliding Door",
       "text": "Large sliding glass door for balconies, terraces and garden openings.",
       "rate": 0,
-      "image": "images/types/sliding-door.svg"
+      "image": "images/types/sliding-door.svg",
+      "config": {
+        "kind": "slider",
+        "panels": 2,
+        "tracks": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-casement-door",
@@ -151,7 +221,12 @@ const DEFAULT_DATA = {
       "name": "uPVC Casement Door",
       "text": "Single side-hung door with a glazed upper panel.",
       "rate": 0,
-      "image": "images/types/casement-door.svg"
+      "image": "images/types/casement-door.svg",
+      "config": {
+        "kind": "casement",
+        "panels": 1,
+        "handle": true
+      }
     },
     {
       "id": "upvc-french-door",
@@ -159,7 +234,12 @@ const DEFAULT_DATA = {
       "name": "uPVC French Door",
       "text": "Twin glazed doors opening from the centre. Wide, bright, classic.",
       "rate": 0,
-      "image": "images/types/french-door.svg"
+      "image": "images/types/french-door.svg",
+      "config": {
+        "kind": "casement",
+        "panels": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-bathroom-door",
@@ -167,7 +247,13 @@ const DEFAULT_DATA = {
       "name": "uPVC Bathroom Door",
       "text": "Fully waterproof door with a louvered base vent. Will not swell, rot or warp.",
       "rate": 0,
-      "image": "images/types/bathroom-door.svg"
+      "image": "images/types/bathroom-door.svg",
+      "config": {
+        "kind": "casement",
+        "panels": 1,
+        "handle": true,
+        "frosted": true
+      }
     },
     {
       "id": "upvc-balcony-door",
@@ -175,7 +261,12 @@ const DEFAULT_DATA = {
       "name": "uPVC Balcony Door",
       "text": "Openable door leaf with a fixed glass side panel.",
       "rate": 0,
-      "image": "images/types/balcony-door.svg"
+      "image": "images/types/balcony-door.svg",
+      "config": {
+        "kind": "combination",
+        "openerKind": "casement",
+        "handle": true
+      }
     },
     {
       "id": "upvc-sliding-folding-door",
@@ -183,7 +274,13 @@ const DEFAULT_DATA = {
       "name": "uPVC Sliding Folding Door",
       "text": "Multiple panels that fold and stack to one side, opening the full width.",
       "rate": 0,
-      "image": "images/types/sliding-folding-door.svg"
+      "image": "images/types/sliding-folding-door.svg",
+      "config": {
+        "kind": "slider",
+        "panels": 4,
+        "tracks": 2,
+        "handle": true
+      }
     },
     {
       "id": "upvc-mosquito-net-shutter",
@@ -191,7 +288,11 @@ const DEFAULT_DATA = {
       "name": "Mosquito Net Shutter",
       "text": "Separate mesh shutter added to an existing window or door.",
       "rate": 0,
-      "image": "images/types/mosquito-net-shutter.svg"
+      "image": "images/types/mosquito-net-shutter.svg",
+      "config": {
+        "kind": "fixed",
+        "panels": 1
+      }
     },
     {
       "id": "upvc-safety-grill",
@@ -199,7 +300,11 @@ const DEFAULT_DATA = {
       "name": "uPVC Safety Grill",
       "text": "MS or aluminium security grill finished to match the uPVC frame.",
       "rate": 0,
-      "image": "images/types/safety-grill.svg"
+      "image": "images/types/safety-grill.svg",
+      "config": {
+        "kind": "fixed",
+        "panels": 1
+      }
     }
   ]
 };
