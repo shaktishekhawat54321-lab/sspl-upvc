@@ -386,3 +386,35 @@ const DRAW = (function () {
 })();
 
 window.DRAW = DRAW;
+
+// ---------------------------------------------------------------
+// Picture for a product: the owner's uploaded photo when there is
+// one, otherwise a generated elevation at a representative size.
+// Returned as a data URI so it drops straight into <img src>.
+// encodeURIComponent, not btoa — the SVG may carry non-latin1 text.
+// ---------------------------------------------------------------
+DRAW.NOMINAL = {
+    slider: [1800, 1200], casement: [1200, 1400], tiltturn: [900, 1400],
+    tophung: [1200, 900], fixed: [1600, 1100], louvre: [600, 600],
+    combination: [2400, 1200]
+};
+
+DRAW.nominalSize = function (product) {
+    const kind = (product && product.config && product.config.kind) || 'fixed';
+    const door = /door/i.test((product && product.id) || '');
+    if (door && kind !== 'slider') return [1100, 2100];
+    if (door && kind === 'slider') return [2400, 2100];
+    return DRAW.NOMINAL[kind] || [1600, 1100];
+};
+
+DRAW.svgFor = function (product, w, h) {
+    const n = DRAW.nominalSize(product);
+    return DRAW.forProduct(product, w || n[0], h || n[1], { showDims: true });
+};
+
+DRAW.dataUri = function (product, w, h) {
+    if (product && product.image) return product.image;   // uploaded photo wins
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(DRAW.svgFor(product, w, h));
+};
+
+window.DRAW = DRAW;

@@ -57,6 +57,34 @@ const quote = {
 };
 
 
+// Width/height in the entered unit, converted to millimetres, which is
+// what the drawing engine works in.
+function toMm(v, unit) {
+
+    const n = Number(v) || 0;
+
+    if (unit === "ft") return n * 304.8;
+    if (unit === "in") return n * 25.4;
+
+    return n;
+
+}
+
+
+// The elevation for a saved line, drawn at that line's own size.
+function itemDrawing(it) {
+
+    const product = data.products.find(p => p.id === it.id) || { config: {} };
+
+    return DRAW.dataUri(
+        product.image ? product : Object.assign({}, product, { image: it.photo || "" }),
+        toMm(it.width, it.unit),
+        toMm(it.height, it.unit)
+    );
+
+}
+
+
 let quoteUnit = "mm";
 
 
@@ -276,7 +304,13 @@ function qbPreview() {
 
     if (!p) return;
 
-    document.getElementById("qbImage").src = p.image;
+    // Draw the elevation at the size actually typed, so the customer sees
+    // their own window rather than a generic picture.
+    const prev = readBuilder();
+
+    document.getElementById("qbImage").src =
+        DRAW.dataUri(p, toMm(prev.width, prev.unit), toMm(prev.height, prev.unit));
+
     document.getElementById("qbImage").alt = p.name;
     document.getElementById("qbDesc").textContent = p.text;
 
@@ -380,7 +414,7 @@ function renderQuoteItems() {
         const a = itemArea(it);
 
         return `<tr>
-            <td><img class="qthumb" src="${it.image}" alt=""></td>
+            <td><img class="qthumb" src="${itemDrawing(it)}" alt=""></td>
             <td><b>${it.name}</b></td>
             <td>${u.fmt(it.width)} &times; ${u.fmt(it.height)}</td>
             <td>${a.single.toFixed(2)} sq.ft</td>
@@ -609,9 +643,10 @@ async function buildQuotePdf() {
     const pngs = {};
 
     for (const it of quote.items) {
-        if (!pngs[it.image]) {
+        const key = itemDrawing(it);
+        if (!pngs[key]) {
             // ~20 mm wide in the table at ~300 dpi
-            pngs[it.image] = await imageToPng(it.image, 260);
+            pngs[key] = await imageToPng(key, 300);
         }
     }
 
@@ -685,7 +720,7 @@ async function buildQuotePdf() {
 
             const it = quote.items[d.row.index];
 
-            const png = it && pngs[it.image];
+            const png = it && pngs[itemDrawing(it)];
 
             if (!png) return;
 
@@ -706,7 +741,7 @@ async function buildQuotePdf() {
                 d.cell.y + (d.cell.height - h) / 2,
                 w,
                 h,
-                it.image,
+                "d" + d.row.index,
                 "MEDIUM"
             );
 

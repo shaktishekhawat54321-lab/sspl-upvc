@@ -29,7 +29,37 @@ function applyDefaults(d) {
     if (!S.mmDivisor) S.mmDivisor = D.mmDivisor;
     if (!S.validityDays) S.validityDays = D.validityDays;
     if (!S.quotePrefix) S.quotePrefix = D.quotePrefix;
-    if (!Array.isArray(S.terms) || !S.terms.length) S.terms = D.terms;
+    if (!S.defaultUnit) S.defaultUnit = D.defaultUnit;
+    if (!S.website) S.website = D.website;
+    if (S.gstin === undefined) S.gstin = D.gstin;
+
+    // Quotation layout. A saved copy from an earlier version has none of
+    // these, so fall back rather than render an empty quotation.
+    ["columns", "specFields", "totalRows", "terms", "coverLetter",
+        "prerequisites", "bankDetails"].forEach(k => {
+            if (!Array.isArray(S[k]) || !S[k].length) S[k] = D[k];
+        });
+
+    if (!S.options || typeof S.options !== "object") S.options = D.options;
+    if (!S.specDefaults || typeof S.specDefaults !== "object") S.specDefaults = D.specDefaults;
+
+    // Any option list added to the defaults later should appear too.
+    Object.keys(D.options).forEach(k => {
+        if (!Array.isArray(S.options[k])) S.options[k] = D.options[k];
+    });
+
+    ["showCoverLetter", "showAcceptance", "showPrerequisites", "showBankDetails"]
+        .forEach(k => { if (S[k] === undefined) S[k] = D[k]; });
+
+    if (!S.acceptanceText) S.acceptanceText = D.acceptanceText;
+
+    // Products saved before the drawing engine have no config.
+    d.products.forEach(p => {
+        if (!p.config || !p.config.kind) {
+            const def = DEFAULT_DATA.products.find(x => x.id === p.id);
+            p.config = (def && def.config) || { kind: "fixed", panels: 1, kgPerSqft: 2 };
+        }
+    });
 
     return d;
 
@@ -255,20 +285,13 @@ function renderProducts(category) {
             <div>
 
                 ${
-                    product.image
-
-                    ?
-
+                    // The owner's photo when one is uploaded, otherwise a
+                    // to-scale elevation generated from the configuration.
                     `<img
-                        src="${product.image}"
+                        src="${DRAW.dataUri(product)}"
                         alt="${product.name}"
+                        loading="lazy"
                     >`
-
-                    :
-
-                    `<div class="placeholder">
-                        ${product.name.toUpperCase()}
-                    </div>`
                 }
 
             </div>
