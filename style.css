@@ -47,3 +47,8 @@
 #optEditor{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
 #optEditor textarea{min-height:88px;font-size:13px}
 @media(max-width:850px){.layout-row{grid-template-columns:1fr;gap:6px}.layout-row .lr-tag{display:none}#optEditor{grid-template-columns:1fr}}
+
+/* ---------- Install App button ---------- */
+.install-btn{border:1px solid #00a651;background:#00a651;color:#fff;font:inherit;font-weight:700;font-size:14px;padding:9px 14px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.install-btn:hover{background:#008f46;border-color:#008f46}
+@media(max-width:850px){.install-btn{width:100%;margin-top:6px}}

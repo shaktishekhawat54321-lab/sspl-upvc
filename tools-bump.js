@@ -31,4 +31,14 @@ PAGES.forEach(page => {
     fs.writeFileSync(page, h);
 });
 
+// Roll the service-worker cache name too. Without this an installed app
+// keeps serving the previous build out of its own cache and never sees
+// the update, however many times the asset URLs change.
+if (fs.existsSync('sw.js')) {
+    const sw = fs.readFileSync('sw.js', 'utf8')
+        .replace(/const CACHE_VERSION = '[^']*';/, "const CACHE_VERSION = 'v" + version + "';");
+    fs.writeFileSync('sw.js', sw);
+    console.log('rolled the service-worker cache to v' + version);
+}
+
 console.log(`stamped ${changed} local asset references with v=${version}`);
