@@ -19,7 +19,7 @@
 // drops the previous cache so nobody is left on stale files.
 // ===================================================================
 
-const CACHE_VERSION = 'v1794221764';
+const CACHE_VERSION = 'v1794221936';
 const CACHE = 'sspl-' + CACHE_VERSION;
 
 // The shell is precached so a brand-new install works offline even if

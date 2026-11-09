@@ -53,7 +53,12 @@
     const installed = window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone === true;
 
-    document.addEventListener('DOMContentLoaded', () => show(false));
+    // The button is shown whenever the app is not already installed,
+    // rather than only when the browser fires beforeinstallprompt.
+    // Safari never fires it, Chrome withholds it once the app has been
+    // installed and removed, and a button nobody ever sees is the same
+    // as no button at all — so it falls back to instructions instead.
+    document.addEventListener('DOMContentLoaded', () => show(!installed));
 
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();          // keep Chrome's own mini-bar out of the way
