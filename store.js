@@ -224,7 +224,7 @@ const Store = {
 
     load() {
 
-        return this.readCache() || DEFAULT_DATA;
+        return applyDefaults(this.readCache() || DEFAULT_DATA);
 
     },
 
@@ -480,6 +480,90 @@ const Store = {
     }
 
 };
+
+
+// Fill in anything an older saved copy (or a partial cloud record)
+// is missing, so render() never meets an undefined field.
+function applyDefaults(d) {
+
+    if (!d || typeof d !== "object") d = {};
+
+    if (!d.settings) d.settings = {};
+    if (!Array.isArray(d.products) || !d.products.length) {
+        d.products = DEFAULT_DATA.products;
+    }
+
+    const S = d.settings;
+    const D = DEFAULT_DATA.settings;
+
+    if (!S.businessName) S.businessName = D.businessName;
+    if (!S.phone) S.phone = S.whatsapp || D.phone;
+    if (!S.inquiry) S.inquiry = S.whatsapp || D.inquiry;
+    if (!S.whatsapp) S.whatsapp = S.inquiry;
+    if (!S.logo) S.logo = D.logo;
+    if (!S.email) S.email = D.email;
+    if (!S.hours) S.hours = D.hours;
+    if (!S.address) S.address = D.address;
+    if (!S.heroEyebrow) S.heroEyebrow = D.heroEyebrow;
+    if (!S.heroTitle) S.heroTitle = D.heroTitle;
+    if (!S.heroText) S.heroText = D.heroText;
+    if (!S.heroImage) S.heroImage = D.heroImage;
+    if (S.gstRate === undefined) S.gstRate = D.gstRate;
+    if (S.minAreaSqft === undefined) S.minAreaSqft = D.minAreaSqft;
+    if (!S.mmDivisor) S.mmDivisor = D.mmDivisor;
+    if (!S.validityDays) S.validityDays = D.validityDays;
+    if (!S.quotePrefix) S.quotePrefix = D.quotePrefix;
+    if (!S.defaultUnit) S.defaultUnit = D.defaultUnit;
+    if (!S.website) S.website = D.website;
+    if (S.gstin === undefined) S.gstin = D.gstin;
+
+    // Quotation layout. A saved copy from an earlier version has none of
+    // these, so fall back rather than render an empty quotation.
+    ["columns", "specFields", "totalRows", "terms", "coverLetter",
+        "prerequisites", "bankDetails"].forEach(k => {
+            if (!Array.isArray(S[k]) || !S[k].length) S[k] = D[k];
+        });
+
+    if (!S.options || typeof S.options !== "object") S.options = D.options;
+    if (!S.specDefaults || typeof S.specDefaults !== "object") S.specDefaults = D.specDefaults;
+
+    // Any option list added to the defaults later should appear too.
+    Object.keys(D.options).forEach(k => {
+        if (!Array.isArray(S.options[k])) S.options[k] = D.options[k];
+    });
+
+    ["showCoverLetter", "showAcceptance", "showPrerequisites", "showBankDetails"]
+        .forEach(k => { if (S[k] === undefined) S[k] = D[k]; });
+
+    if (!S.acceptanceText) S.acceptanceText = D.acceptanceText;
+
+    // Products saved before the drawing engine have no config.
+    d.products.forEach(p => {
+        if (!p.config || !p.config.kind) {
+            const def = DEFAULT_DATA.products.find(x => x.id === p.id);
+            p.config = (def && def.config) || { kind: "fixed", panels: 1, kgPerSqft: 2 };
+        }
+    });
+
+    // Catalogue items added since this copy was saved. Without this a
+    // returning visitor keeps the old list for ever and never sees a
+    // new product; the owner's rates and photos are untouched.
+    const have = new Set(d.products.map(p => p.id));
+
+    DEFAULT_DATA.products.forEach(dp => {
+        if (!have.has(dp.id)) d.products.push(JSON.parse(JSON.stringify(dp)));
+    });
+
+    // `image` used to hold the retired static drawings and is now the
+    // owner's own photo slot. An old value there would hide the
+    // generated elevation, so clear it.
+    d.products.forEach(p => {
+        if (typeof p.image === "string" && /^images\/types\//.test(p.image)) p.image = "";
+    });
+
+    return d;
+
+}
 
 
 // `const` at the top level of a classic script creates a lexical global,

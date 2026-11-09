@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+<title>Sani Steels Pvt Ltd</title>
+<rect width="256" height="256" rx="46" fill="#1d2a44"/>
+<rect x="40" y="52" width="176" height="124" rx="6" fill="none" stroke="#ffffff" stroke-width="13"/>
+<rect x="56" y="68" width="68" height="92" fill="#e8f0f8"/>
+<rect x="132" y="68" width="68" height="92" fill="#aec7dd"/>
+<rect x="121" y="96" width="9" height="36" rx="4" fill="#1d2a44"/>
+<rect x="40" y="194" width="176" height="14" rx="7" fill="#00a651"/>
+<polygon points="78,201 58,201 58,191 40,201 58,211 58,201" fill="#00a651"/>
+<polygon points="178,201 198,201 198,191 216,201 198,211 198,201" fill="#00a651"/>
+</svg>
